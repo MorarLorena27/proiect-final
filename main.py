@@ -449,7 +449,12 @@ def inlocuire_cuvant():
 
     # Verificam daca exista
     if tinta not in text_curent:
-        print(f"Cuvantul '{tinta}' nu a fost gasit in text.")
+        if tinta.lower() in text_curent.lower():
+            print(f"[!] Atentie: Cuvantul exact '{tinta}' nu a fost gasit.")
+            print("    Insa textul contine acest cuvant scris cu alte majuscule.")
+            print("    Va rugam sa reincercati scriind cuvantul EXACT cum apare in text.")
+        else:
+            print(f"Cuvantul '{tinta}' nu a fost gasit in text.")
         return
 
     nou = input(f"Cu ce doriti sa inlocuiti '{tinta}'? : ")
@@ -466,9 +471,9 @@ def inlocuire_cuvant():
 
 def cea_mai_lunga_propozitie():
     """
-    [FUNCTIONALITATE 4]
-    Identifica si afiseaza propozitia cu cele mai multe cuvinte.
-    Parcurge textul, separa propozitiile si le numara cuvintele.
+    [FUNCTIONALITATE 4 - ACTUALIZATA]
+    Identifica si afiseaza TOATE propozitiile care au numarul maxim de cuvinte.
+    Trateaza cazul de egalitate (cand mai multe propozitii au aceeasi lungime maxima).
     """
     global text_curent
 
@@ -476,11 +481,12 @@ def cea_mai_lunga_propozitie():
         print("\n[!] Nu exista text incarcat!")
         return
 
-    print("\n=== CEA MAI LUNGA PROPOZITIE ===")
+    print("\n=== CEA MAI LUNGA PROPOZITIE (SAU PROPOZITII) ===")
 
     propozitie_curenta = ""
     max_cuvinte = 0
-    propozitie_castigatoare = ""
+    # Aici e schimbarea: folosim o LISTA pentru a tine minte castigatorii
+    propozitii_castigatoare = []
 
     i = 0
     while i < len(text_curent):
@@ -494,20 +500,36 @@ def cea_mai_lunga_propozitie():
             cuvinte_prop = extrage_cuvinte(propozitie_curata)
             nr_cuvinte = len(cuvinte_prop)
 
-            if nr_cuvinte > max_cuvinte:
-                max_cuvinte = nr_cuvinte
-                propozitie_castigatoare = propozitie_curata
+            if nr_cuvinte > 0:
+                # CAZUL 1: Am gasit un nou record absolut
+                if nr_cuvinte > max_cuvinte:
+                    max_cuvinte = nr_cuvinte
+                    # Resetam lista si adaugam noul campion
+                    propozitii_castigatoare = [propozitie_curata]
+
+                # CAZUL 2: Am gasit o propozitie egala cu recordul actual
+                elif nr_cuvinte == max_cuvinte:
+                    # O adaugam in lista alaturi de celelalte
+                    propozitii_castigatoare.append(propozitie_curata)
 
             propozitie_curenta = ""
 
         i += 1
 
+    # Afisare rezultat
     if max_cuvinte > 0:
-        print(f"Cea mai lunga propozitie are {max_cuvinte} cuvinte:")
-        print(f"-> \"{propozitie_castigatoare}\"")
+        if len(propozitii_castigatoare) == 1:
+            print(f"Am gasit o propozitie cu {max_cuvinte} cuvinte:")
+            print(f"-> \"{propozitii_castigatoare[0]}\"")
+        else:
+            print(
+                f"Am gasit {len(propozitii_castigatoare)} propozitii cu aceeasi lungime maxima ({max_cuvinte} cuvinte):")
+            k = 0
+            while k < len(propozitii_castigatoare):
+                print(f"{k + 1}. \"{propozitii_castigatoare[k]}\"")
+                k += 1
     else:
         print("Nu s-au putut identifica propozitii valide.")
-
 
 # ==========================================
 # MENIU PRINCIPAL
